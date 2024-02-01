@@ -54,7 +54,7 @@ pip install -e .
 from audioseal import AudioSeal
 
 # 모델 이름은 audioseal/cards에 있는 YAML 카드 파일 이름에 해당합니다.
-모델 = 오디오씰.로드_제너레이터("audioseal_wm_16bits")
+model = AudioSeal.load_generator("audioseal_wm_16bits")
 
 # 다른 방법은 체크포인트에서 직접 로드하는 것입니다.
 # # model =  Watermarker.from_pretrained(checkpoint_path, device = wav.device)
