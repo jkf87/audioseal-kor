@@ -1,7 +1,7 @@
 # :loud_sound: AudioSeal: 선제적 로컬라이즈드 워터마킹
 
 <a href="https://www.python.org/"><img alt="Python" src="https://img.shields.io/badge/-Python 3.8+-blue?style=for-the-badge&logo=python&logoColor=white"></a>
-<a href="https://black.readthedocs.io/en/stable/"><img alt="코드 스타일: 검은색" src="https://img.shields.io/badge/code%20style-black-black.svg?style=for-the-badge&labelColor=gray"></a>
+<a href="https://black.readthedocs.io/en/stable/"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-black.svg?style=for-the-badge&labelColor=gray"></a>
 
 음성 로컬라이즈드 워터마킹 방법인 오디오씰을 소개합니다.
 워터마킹의 견고성을 손상시키지 않으면서도 최첨단 검출기 속도를 자랑하는 오디오씰을 소개합니다. 오디오에 워터마크를 삽입하는 제너레이터와 편집이 있는 경우에도 긴 오디오에서 워터마킹된 조각을 감지하는 검출기를 함께 훈련합니다.
@@ -16,10 +16,10 @@
 
 # :메이트: 설치
 
-오디오씰에는 파이썬 >=3.8, 파이토치 >= 1.13.0, [omegaconf](https://omegaconf.readthedocs.io/), [julius](https://pypi.org/project/julius/), numpy가 필요합니다. PyPI에서 설치하려면:
+오디오씰에는 Python >=3.8, Pytorch >= 1.13.0, [omegaconf](https://omegaconf.readthedocs.io/), [julius](https://pypi.org/project/julius/), and numpy가 필요합니다. PyPI에서 설치하려면:
 
 ```
-pip 설치 오디오실
+pip install audioseal
 ```
 
 소스에서 설치하려면: 이 리포지토리를 복제하고 편집 가능한 모드로 설치합니다:
@@ -27,17 +27,17 @@ pip 설치 오디오실
 ```
 git clone https://github.com/facebookresearch/audioseal
 cd audioseal
-pip 설치 -e .
+pip install -e .
 ```
 
 # :기어: 모델
 
 다음 모델에 대한 체크포인트를 제공합니다:
 
-- 오디오씰 생성기](src/cards/audioseal_wm_16bits.yaml).
+- [오디오씰 생성기](src/cards/audioseal_wm_16bits.yaml).
   오디오 신호(파형)를 입력으로 받고, 입력과 동일한 크기의 워터마크를 출력하며, 입력에 추가하여 워터마킹할 수 있습니다.
   선택적으로 워터마크에 인코딩할 16비트 비밀 메시지를 입력으로 받을 수도 있습니다.
-- 오디오씰 검출기](src/cards/audioseal_detector_16bits.yaml).
+- [오디오씰 검출기](src/cards/audioseal_detector_16bits.yaml).
   오디오 신호(파형)를 입력으로 받고, 오디오의 각 샘플마다(1/16k 초마다) 입력에 워터마크가 포함될 확률을 출력합니다.
   선택적으로 워터마크에 인코딩된 비밀 메시지를 출력할 수도 있습니다.
 
@@ -51,21 +51,21 @@ pip 설치 -e .
 
 ```python
 
-에서 오디오씰을 가져옵니다.
+from audioseal import AudioSeal
 
 # 모델 이름은 audioseal/cards에 있는 YAML 카드 파일 이름에 해당합니다.
 모델 = 오디오씰.로드_제너레이터("audioseal_wm_16bits")
 
 # 다른 방법은 체크포인트에서 직접 로드하는 것입니다.
-# 모델 = 워터마커.부터_사전학습(체크포인트_경로, 디바이스 = wav.디바이스)
+# # model =  Watermarker.from_pretrained(checkpoint_path, device = wav.device)
 
-워터마크 = model.get_watermark(wav)
+watermark = model.get_watermark(wav)
 
 # 선택 사항: 워터마크에 삽입할 16비트 메시지를 추가할 수 있습니다.
 # msg = torch.randint(0, 2, (wav.shape(0), model.msg_processor.nbits), device=wav.device)
 # watermark = model.get_watermark(wav, message = msg)
 
-워터마크_오디오 = wav + 워터마크
+watermarked_audio = wav + watermark
 
 detector = AudioSeal.load_detector("audioseal_detector_16bits")
 
@@ -77,7 +77,7 @@ print(message) # 메시지는 16비트의 바이너리 벡터입니다.
 
 
 # 로우 레벨에서 메시지를 감지합니다.
-결과, 메시지 = 검출기(워터마크_오디오)
+result, message = detector.detect_watermark(watermarked_audio)
 
 # 결과는 각 프레임에 대한 워터마킹의 확률(양수 및 음수)을 나타내는 배치 크기 x 2 x 프레임의 텐서입니다.
 # 워터마킹된 오디오는 결과[:, 1, :] > 0.5가 되어야 합니다.
