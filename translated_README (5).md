@@ -70,7 +70,7 @@ watermarked_audio = wav + watermark
 detector = AudioSeal.load_detector("audioseal_detector_16bits")
 
 # 하이레벨에서 메시지를 탐지합니다.
-결과, 메시지 = detector.detect_watermark(watermarked_audio)
+result, message = detector.detect_watermark(watermarked_audio)
 
 print(result) # 결과는 오디오에 워터마크가 있을 확률을 나타내는 실수입니다,
 print(message) # 메시지는 16비트의 바이너리 벡터입니다.
